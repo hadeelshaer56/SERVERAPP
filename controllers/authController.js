@@ -2,6 +2,7 @@ const authService = require("../services/authService");
 
 class AuthController {
   showRegister(req, res) {
+    if (req.session.user) return res.redirect("/");
     res.render("register", { error: null });
   }
 
@@ -13,13 +14,18 @@ class AuthController {
       // store minimal user in session
       req.session.user = { id: user.id, email: user.email, fullName: user.fullName };
 
-      res.redirect("/");
+      const redirectTo = req.session.returnTo || "/";
+      delete req.session.returnTo;
+
+      // ensure session is persisted before redirect
+      return req.session.save(() => res.redirect(redirectTo));
     } catch (err) {
       res.status(400).render("register", { error: err.message });
     }
   }
 
   showLogin(req, res) {
+    if (req.session.user) return res.redirect("/");
     res.render("login", { error: null });
   }
 
@@ -30,7 +36,11 @@ class AuthController {
 
       req.session.user = { id: user.id, email: user.email, fullName: user.fullName };
 
-      res.redirect("/");
+      const redirectTo = req.session.returnTo || "/";
+      delete req.session.returnTo;
+
+      // ensure session is persisted before redirect
+      return req.session.save(() => res.redirect(redirectTo));
     } catch (err) {
       res.status(400).render("login", { error: err.message });
     }

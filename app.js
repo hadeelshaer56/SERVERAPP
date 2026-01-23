@@ -2,9 +2,13 @@ const express = require("express");
 const path = require("path");
 const sessionMiddleware = require("./config/session");
 const authRoutes = require("./routes/authRoutes");
+const videoRoutes = require("./routes/videoRoutes");
 const requireAuth = require("./middleware/requireAuth");
 
 const app = express();
+
+// Render/Proxy safety (needed for secure cookies behind a proxy)
+app.set("trust proxy", 1);
 
 // view engine
 app.set("view engine", "ejs");
@@ -24,6 +28,7 @@ app.use((req, res, next) => {
 
 // routes
 app.use(authRoutes);
+app.use(videoRoutes);
 
 // protected home
 app.get("/", requireAuth, (req, res) => {
@@ -36,4 +41,4 @@ app.use((req, res) => {
 });
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`Server running on port ${PORT} updated`));
+app.listen(PORT, () => console.log(`Server running on http://localhost:${PORT}`));
